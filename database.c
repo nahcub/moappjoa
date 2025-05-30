@@ -45,3 +45,41 @@ LLIST* load_albums_from_db(LLIST* llist, sqlite3* db) {
     return llist;
 }
 
+SONG* find_title_db(sqlite3* db, const char* title) {
+    const char* sql = "SELECT title, artist, album_id FROM song WHERE title = ?;";
+    sqlite3_stmt* stmt;
+    int rc;
+
+    // SQL 준비
+    rc = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "[SQLite ERROR] prepare failed: %s\n", sqlite3_errmsg(db));
+        return NULL;
+    }
+
+    // ?에 title_query 바인딩
+    sqlite3_bind_text(stmt, 1, title, -1, SQLITE_STATIC);
+
+
+    SONG* result;
+
+    // 쿼리 실행
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        result = (SONG*)malloc(sizeof(SONG));
+        strcpy(result->title, (const char*)sqlite3_column_text(stmt, 0));
+        strcpy(result->artist, (const char*)sqlite3_column_text(stmt, 1));
+        printf("노래 제목: %s\n", sqlite3_column_text(stmt, 0));
+        printf("노래 아티스트: %s\n", sqlite3_column_text(stmt, 1));
+    } 
+    else {
+        printf("'%s' 제목의 노래를 찾을 수 없습니다.\n", title);
+        free(result);
+        result = NULL;
+
+
+    sqlite3_finalize(stmt);
+    return result;
+    }
+}
+
+

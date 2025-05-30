@@ -174,6 +174,9 @@ int main(int argc, char* argv[]){
     else if(*argv[1] == 'p'){
         print_all(llist);
     }
+    else if(!strcmp(argv[1], "ftd")){  // search title in database
+        find_title_db(db, argv[2]);
+    }
 
     sqlite3_close(db);
     printf("[SQLite] Closed DB\n");

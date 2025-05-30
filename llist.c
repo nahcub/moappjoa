@@ -633,3 +633,39 @@ void print_member(LLIST* mllist){
 	current = current->next;
 	}	
 }
+
+void search_song_by_title(sqlite3* db, const char* title) {
+    sqlite3_stmt* stmt;
+    char* sql = "SELECT s.title, s.artist, a.name as album_name, a.artist as album_artist, a.year "
+                "FROM song s "
+                "JOIN album a ON s.album_id = a.id "
+                "WHERE s.title LIKE ?;";
+    
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
+        fprintf(stderr, "Failed to prepare statement: %s\n", sqlite3_errmsg(db));
+        return;
+    }
+
+    // 검색어에 % 추가 (부분 일치 검색)
+    char search_pattern[100];
+    snprintf(search_pattern, sizeof(search_pattern), "%%%s%%", title);
+    sqlite3_bind_text(stmt, 1, search_pattern, -1, SQLITE_STATIC);
+
+    int found = 0;
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        found = 1;
+        printf("\n***** 노래 검색 결과 *****\n");
+        printf("노래 제목: %s\n", sqlite3_column_text(stmt, 0));
+        printf("노래 아티스트: %s\n", sqlite3_column_text(stmt, 1));
+        printf("앨범 제목: %s\n", sqlite3_column_text(stmt, 2));
+        printf("앨범 아티스트: %s\n", sqlite3_column_text(stmt, 3));
+        printf("앨범 발매년도: %d\n", sqlite3_column_int(stmt, 4));
+        printf("************************\n");
+    }
+
+    if (!found) {
+        printf("'%s' 제목의 노래를 찾을 수 없습니다.\n", title);
+    }
+
+    sqlite3_finalize(stmt);
+}

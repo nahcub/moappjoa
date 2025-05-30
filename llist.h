@@ -21,8 +21,6 @@ typedef struct {
    SONG            s_list[20]; 
 } ALBUM;
 
-
-
 typedef struct node{
     char fileName[20];
     ALBUM* p_album;
@@ -41,7 +39,6 @@ typedef struct buy_album_node{
     struct buy_album_node* pre;
     struct buy_album_node* next;
 }BUYALBUMNODE;
-
 
 //송노드를 연결해서 플레이리스트 만들자.
 typedef struct songnode{ 
@@ -65,14 +62,11 @@ typedef struct member{
     PLAYLIST playlist[100]; //연결리스트가 100개
 }MEMBER;
 
-
 typedef struct membernode{
     MEMBER* member;
     struct membernode *pre;
     struct membernode *next;
 }MEMBERNODE;
-
-
 
 NODE* search_file(LLIST* llist, char* filename);
 LLIST* insert_file(LLIST* llist, char* s_fileName, char* a_fileName, ALBUM* content);

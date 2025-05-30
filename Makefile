@@ -33,7 +33,8 @@ find_title:
 	./fm ft title1
 #   ./fm ft title2
 	./fm ft title3
-
+find_title_db:
+	./fm ftd mercury
 find_artist:
 # fm fx [artist]
 	./fm fx artist1
@@ -66,18 +67,9 @@ add_playlist:
 	
 
 run:
-#   echo "" > iu2003.db
-	echo "" > member_db.txt
-	echo "" > db.txt
 	make db_create
 	make song_insert
-#	make find_title
-#	make find_artist
-	make db_all_print
-	make add_member
-	make buy
-	make add_playlist
-#	./fm pm
+	make find_title_db
 
 clean:
 	rm -rf *.o 
