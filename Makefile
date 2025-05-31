@@ -2,7 +2,7 @@ LIBS = -lsqlite3
 
 all:
 	make clean
-	gcc -o fm llist.c fm.c database.c $(LIBS)
+	gcc -o fm llist.c fm.c database.c initialize_db.c $(LIBS)
 
 db_create:
 # fm [i/d/s/m] [into] [new] [title] [artst] [year] [songs]
@@ -52,7 +52,7 @@ db_print:
 
 add_member:
 	./fm im member lee 10 1
-	./fm im lee kate 20 2
+	./fm im lee kate 2* 2
 	./fm im kate kim 30 3
 
 buy:
@@ -67,6 +67,7 @@ add_playlist:
 	
 
 run:
+	./fm db
 	make db_create
 	make song_insert
 	make find_title_db

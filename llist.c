@@ -211,7 +211,7 @@ LLIST* insert_song(LLIST* llist, char* album, char* index, char* title, char* ar
 	NODE* node;
 
 	if((node = search_file(llist, album)) == NULL){
-        printf("응 아니야");
+        printf("[Insert Song] Album '%s' not found.\n", album);
 		return NULL;
 	}
 	strcpy(node->p_album->s_list[atoi(index) - 1].title, title);
@@ -242,6 +242,10 @@ LLIST* insert_song(LLIST* llist, char* album, char* index, char* title, char* ar
         
 
 	return llist;
+}
+
+delete_song(LLIST* llist, char* album, char* title){
+
 }
 
 SONG* find_title(LLIST* llist, char* title){

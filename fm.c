@@ -1,9 +1,7 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <sqlite3.h>
 #include "database.h"
 #include "llist.h"
+#include "initialize_db.h"
 
 
 int main(int argc, char* argv[]){
@@ -13,102 +11,11 @@ int main(int argc, char* argv[]){
     SONGNODE* song_current;
 
     sqlite3* db;
-    char* err_msg = 0;
-
-    // Initialize SQLite database
     if(sqlite3_open("music.db", &db)){
         fprintf(stderr, "[SQLite ERROR] Cannot open database: %s\n", sqlite3_errmsg(db));
         return -1;
     }
-    sqlite3_exec(db, "PRAGMA foreign_keys = ON;", 0, 0, 0); //foreign 키 사용할 수 있게
-    printf("[SQLite] Database opened successfully\n");
-
-    // Create album table
-    const char* sql = "CREATE TABLE IF NOT EXISTS album ("
-                     "id TEXT PRIMARY KEY, "
-                     "name TEXT NOT NULL, "
-                     "artist TEXT NOT NULL, "
-                     "year INTEGER NOT NULL, "
-                     "n_songs INTEGER NOT NULL);";
-    if (sqlite3_exec(db, sql, 0, 0, &err_msg) != SQLITE_OK) {
-        fprintf(stderr, "[SQLite ERROR] Failed to create table: %s\n", err_msg);
-        sqlite3_free(err_msg);
-        sqlite3_close(db);
-        return -1;
-    }
-    printf("[SQLite] Table 'album' is ready\n");
-
-    //create song in album
-    sql = "CREATE TABLE IF NOT EXISTS song ("
-    "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-    "album_id TEXT NOT NULL, "
-    "title TEXT NOT NULL, "
-    "artist TEXT NOT NULL, "
-    "FOREIGN KEY(album_id) REFERENCES album(id));";
-    if (sqlite3_exec(db, sql, 0, 0, &err_msg) != SQLITE_OK) {
-    fprintf(stderr, "[SQLite ERROR] Failed to create song table: %s\n", err_msg);
-    sqlite3_free(err_msg);
-    sqlite3_close(db);
-    return -1;
-    }
-    printf("[SQLite] Table 'song' is ready\n");
-
-    // Create member table
-    sql = "CREATE TABLE IF NOT EXISTS member ("
-          "id TEXT PRIMARY KEY, "
-          "name TEXT NOT NULL, "
-          "age INTEGER NOT NULL, "
-          "grade INTEGER NOT NULL);";
-    if (sqlite3_exec(db, sql, 0, 0, &err_msg) != SQLITE_OK) {
-        fprintf(stderr, "[SQLite ERROR] Failed to create member table: %s\n", err_msg);
-        sqlite3_free(err_msg);
-        sqlite3_close(db);
-        return -1;
-    }
-    printf("[SQLite] Table 'member' is ready\n");
-
-    // Create playlist table
-    sql = "CREATE TABLE IF NOT EXISTS playlist ("
-          "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-          "member_id TEXT NOT NULL, "
-          "name TEXT NOT NULL, "
-          "FOREIGN KEY(member_id) REFERENCES member(id));";
-    if (sqlite3_exec(db, sql, 0, 0, &err_msg) != SQLITE_OK) {
-        fprintf(stderr, "[SQLite ERROR] Failed to create playlist table: %s\n", err_msg);
-        sqlite3_free(err_msg);
-        sqlite3_close(db);
-        return -1;
-    }
-    printf("[SQLite] Table 'playlist' is ready\n");
-
-    // Create playlist_song table
-    sql = "CREATE TABLE IF NOT EXISTS playlist_song ("
-          "playlist_id INTEGER NOT NULL, "
-          "album_id TEXT NOT NULL, "
-          "song_title TEXT NOT NULL, "
-          "FOREIGN KEY(playlist_id) REFERENCES playlist(id), "
-          "FOREIGN KEY(album_id) REFERENCES album(id));";
-    if (sqlite3_exec(db, sql, 0, 0, &err_msg) != SQLITE_OK) {
-        fprintf(stderr, "[SQLite ERROR] Failed to create playlist_song table: %s\n", err_msg);
-        sqlite3_free(err_msg);
-        sqlite3_close(db);
-        return -1;
-    }
-    printf("[SQLite] Table 'playlist_song' is ready\n");
-
-    // Create member_album table
-    sql = "CREATE TABLE IF NOT EXISTS member_album ("
-          "member_id TEXT NOT NULL, "
-          "album_id TEXT NOT NULL, "
-          "FOREIGN KEY(member_id) REFERENCES member(id), "
-          "FOREIGN KEY(album_id) REFERENCES album(id));";
-    if (sqlite3_exec(db, sql, 0, 0, &err_msg) != SQLITE_OK) {
-        fprintf(stderr, "[SQLite ERROR] Failed to create member_album table: %s\n", err_msg);
-        sqlite3_free(err_msg);
-        sqlite3_close(db);
-        return -1;
-    }
-    printf("[SQLite] Table 'member_album' is ready\n");
+    printf("[SQLite] Opened DB\n");
 
     /* Initialize data structure */
     LLIST* llist = (LLIST*)malloc(sizeof(LLIST));
@@ -128,6 +35,9 @@ int main(int argc, char* argv[]){
     }
     else if(!strcmp(argv[1], "pm")){
         print_member(mllist);
+    }
+    else if(!strcmp(argv[1], "db")){
+        initialize_database(db);
     }
     else if(!strcmp(argv[1], "buy")){
         mllist = buy_album(mllist, llist, argv[2], argv[3]);
