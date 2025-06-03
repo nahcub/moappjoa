@@ -2,75 +2,103 @@ LIBS = -lsqlite3
 
 all:
 	make clean
-	gcc -o fm llist.c fm.c database.c initialize_db.c $(LIBS)
+	gcc -o fm fm.c database.c initialize_db.c hash.c user.c $(LIBS)
 
-db_create:
+add_album:
 # fm [i/d/s/m] [into] [new] [title] [artst] [year] [songs]
-	./fm i iu2003.db iu2010.db flower iu 2010 0
-	./fm i iu2010.db iu2012.db island iu 2012 0
-	./fm i iu2012.db sza.db sos sza 2019 0
-	./fm i sza.db steve_lacy.db gemini_rights steve_lacy 2021 0
-song_insert:
-# fm is [album]   [index of song]   [title]   [artist]
-	./fm is iu2010.db 1 title1 artist1
-	./fm is iu2010.db 2 title3 artist3
-	./fm is iu2012.db 1 title4 artist4
-	./fm is iu2012.db 2 title5 artist5
-	./fm is sza.db 1 zinzzaggt sza
-	./fm is sza.db 2 kill_bill sza
-	./fm is sza.db 3 seek_and_destroy sza
-	./fm is sza.db 4 low sza
-	./fm is sza.db 5 love_language sza
-	./fm is sza.db 6 blind sza
-	./fm is steve_lacy.db 1 static steve_lacy
-	./fm is steve_lacy.db 2 helmet steve_lacy
-	./fm is steve_lacy.db 3 mercury steve_lacy
-	./fm is steve_lacy.db 4 buttons steve_lacy
-	./fm is steve_lacy.db 5 bad_habit steve_lacy
+	./fm b flower iu 2010 0
+	./fm b island iu 2012 0
+	./fm b sos sza 2019 0
+	./fm b gemini_rights steve_lacy 2021 0
+	./fm b album_to_delete artist 2025 0
 
-find_title:
-# fm ft [title]
-	./fm ft title1
-#   ./fm ft title2
-	./fm ft title3
-find_title_db:
-	./fm ftd mercury
-find_artist:
-# fm fx [artist]
-	./fm fx artist1
-#   ./fm fx artist2
-	./fm fx artist3
+get_album:
+	./fm a 3
+delete_album:
+	./fm c 5
 
-db_all_print:
-# fm p
-	./fm p
+add_song:
+# IU - flower 앨범 노래들
+	./fm e 1 iu flower
+	./fm e 1 iu good_day
+	./fm e 1 iu you_and_i
 
-db_print:
-	./fm s iu2010.db
-	./fm s iu2012.db
-	./fm s iu2005.db
+# IU - island 앨범 노래들
+	./fm e 2 iu island
+	./fm e 2 iu every_end_of_the_day
+	./fm e 2 iu peach
 
+# SZA - SOS 앨범 노래들
+	./fm e 3 sza seek_and_destroy
+	./fm e 3 sza low
+	./fm e 3 sza love_language
+	./fm e 3 sza blind
+	./fm e 3 sza used
+	./fm e 3 sza snooze
+	./fm e 3 sza notice_me
+	./fm e 3 sza gone_girl
+	./fm e 3 sza smoking_on_my_ex_pack
+	./fm e 3 sza ghost_in_the_machine
+
+# Steve Lacy - Gemini Rights 앨범 노래들
+	./fm e 4 steve_lacy static
+	./fm e 4 steve_lacy helmet
+	./fm e 4 steve_lacy mercury
+	./fm e 4 steve_lacy buttons
+	./fm e 4 steve_lacy bad_habit
+get_song:
+	./fm d 5
+
+delete_song:
+	./fm f 5
 add_member:
-	./fm im member lee 10 1
-	./fm im lee kate 2* 2
-	./fm im kate kim 30 3
+	./fm h "John_Smith" 20 1
+	./fm h "Emma_Wilson" 22 2
+	./fm h "Michael_Brown" 25 3
+	./fm h "Sarah_Davis" 19 1
+	./fm h "David_Lee" 23 2
+get_member:
+	./fm g 1
+delete_member:
+#	./fm i 1
 
-buy:
-	./fm buy kate island
-	./fm buy kim flower
-#	./fm buy kim iu2012.db
-#	./fm buy lee iu2010.db
 
-add_playlist:
-	./fm ip kate myList island title4
-	./fm ip kate myList island title5
-	
+buy_album:
+	./fm j 1 3  # John Smith가 sos 앨범 구매
+	./fm j 1 4  # John Smith가 gemini_rights 구매
+	./fm j 2 2  # Emma Wilson이 island 앨범 구매
+create_playlist:
+	./fm k 2 "brooklyn"
+	./fm k 2 "Workout_Mix"
+	./fm k 3 "Chill"
 
+add_song_to_playlist:
+	./fm m 1 3 7  # John Smith의 brooklyn 플레이리스트에 sos의 seek_and_destroy 추가
+	./fm m 1 3 8  # John Smith의 brooklyn 플레이리스트에 sos의 low 추가
+	./fm m 1 3 9  # John Smith의 brooklyn 플레이리스트에 sos의 love_language 추가
+	./fm m 3 4 21  # Emma Wilson의 Chill 플레이리스트에 steve_lacy의 gemini_rights앨범의 bad_habit 추가가
+
+get_playlist:
+	./fm l 1 # brooklyn playlist 검색
+delete_playlist:
+	./fm n 3 # Chill playlist 삭제 
 run:
-	./fm db
-	make db_create
-	make song_insert
-	make find_title_db
+	./fm z
+	make add_album
+	make get_album
+	make delete_album
+	make add_song
+	make get_song
+	make delete_song
+	make add_member
+	make get_member
+	make delete_member
+	make create_playlist
+	make buy_album
+	make add_song_to_playlist
+	./fm y
+	make get_playlist
+	make delete_playlist
 
 clean:
 	rm -rf *.o 

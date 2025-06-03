@@ -12,7 +12,7 @@ int initialize_database(sqlite3* db) {
 
     // Create album table
     sql = "CREATE TABLE IF NOT EXISTS album ("
-          "id TEXT PRIMARY KEY, "
+          "id INTEGER PRIMARY KEY AUTOINCREMENT, "
           "name TEXT NOT NULL, "
           "artist TEXT NOT NULL, "
           "year INTEGER NOT NULL, "
@@ -27,10 +27,10 @@ int initialize_database(sqlite3* db) {
     // Create song table
     sql = "CREATE TABLE IF NOT EXISTS song ("
           "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-          "album_id TEXT NOT NULL, "
+          "album_id INTEGER NOT NULL, "
           "title TEXT NOT NULL, "
           "artist TEXT NOT NULL, "
-          "FOREIGN KEY(album_id) REFERENCES album(id));";
+          "FOREIGN KEY(album_id) REFERENCES album(id) ON DELETE CASCADE);";
     if (sqlite3_exec(db, sql, 0, 0, &err_msg) != SQLITE_OK) {
         fprintf(stderr, "[SQLite ERROR] Failed to create 'song' table: %s\n", err_msg);
         sqlite3_free(err_msg);
@@ -40,7 +40,7 @@ int initialize_database(sqlite3* db) {
 
     // Create member table
     sql = "CREATE TABLE IF NOT EXISTS member ("
-          "id TEXT PRIMARY KEY, "
+          "id INTEGER PRIMARY KEY AUTOINCREMENT, "
           "name TEXT NOT NULL, "
           "age INTEGER NOT NULL, "
           "grade INTEGER NOT NULL);";
@@ -54,9 +54,10 @@ int initialize_database(sqlite3* db) {
     // Create playlist table
     sql = "CREATE TABLE IF NOT EXISTS playlist ("
           "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-          "member_id TEXT NOT NULL, "
+          "member_id INTEGER NOT NULL, "
           "name TEXT NOT NULL, "
-          "FOREIGN KEY(member_id) REFERENCES member(id));";
+          "UNIQUE(member_id, name), "
+          "FOREIGN KEY(member_id) REFERENCES member(id) ON DELETE CASCADE);";
     if (sqlite3_exec(db, sql, 0, 0, &err_msg) != SQLITE_OK) {
         fprintf(stderr, "[SQLite ERROR] Failed to create 'playlist' table: %s\n", err_msg);
         sqlite3_free(err_msg);
@@ -67,10 +68,11 @@ int initialize_database(sqlite3* db) {
     // Create playlist_song table
     sql = "CREATE TABLE IF NOT EXISTS playlist_song ("
           "playlist_id INTEGER NOT NULL, "
-          "album_id TEXT NOT NULL, "
-          "song_title TEXT NOT NULL, "
-          "FOREIGN KEY(playlist_id) REFERENCES playlist(id), "
-          "FOREIGN KEY(album_id) REFERENCES album(id));";
+          "album_id INTEGER NOT NULL, "
+          "song_id INTEGER NOT NULL, "
+          "FOREIGN KEY(playlist_id) REFERENCES playlist(id) ON DELETE CASCADE, "
+          "FOREIGN KEY(album_id) REFERENCES album(id) ON DELETE CASCADE, "
+          "FOREIGN KEY(song_id) REFERENCES song(id) ON DELETE CASCADE);";
     if (sqlite3_exec(db, sql, 0, 0, &err_msg) != SQLITE_OK) {
         fprintf(stderr, "[SQLite ERROR] Failed to create 'playlist_song' table: %s\n", err_msg);
         sqlite3_free(err_msg);
@@ -80,8 +82,8 @@ int initialize_database(sqlite3* db) {
 
     // Create member_album table
     sql = "CREATE TABLE IF NOT EXISTS member_album ("
-          "member_id TEXT NOT NULL, "
-          "album_id TEXT NOT NULL, "
+          "member_id INTEGER NOT NULL, "
+          "album_id INTEGER NOT NULL, "
           "FOREIGN KEY(member_id) REFERENCES member(id), "
           "FOREIGN KEY(album_id) REFERENCES album(id));";
     if (sqlite3_exec(db, sql, 0, 0, &err_msg) != SQLITE_OK) {
@@ -91,10 +93,30 @@ int initialize_database(sqlite3* db) {
     }
     printf("[SQLite] Table 'member_album' is ready\n");
 
+    // Create member_song table
+    sql = "CREATE TABLE IF NOT EXISTS member_song ("
+          "member_id INTEGER NOT NULL, "
+          "song_id INTEGER NOT NULL, "
+          "FOREIGN KEY(member_id) REFERENCES member(id), "
+          "FOREIGN KEY(song_id) REFERENCES song(id));";
+    if (sqlite3_exec(db, sql, 0, 0, &err_msg) != SQLITE_OK) {
+        fprintf(stderr, "[SQLite ERROR] Failed to create 'member_song' table: %s\n", err_msg);
+        sqlite3_free(err_msg);
+        return -1;
+    }
+    printf("[SQLite] Table 'member_song' is ready\n");
+
     // Create indexes to improve search performance
     sql = "CREATE INDEX IF NOT EXISTS idx_song_title ON song(title);";
     if (sqlite3_exec(db, sql, 0, 0, &err_msg) != SQLITE_OK) {
         fprintf(stderr, "[SQLite ERROR] Failed to create index 'idx_song_title': %s\n", err_msg);
+        sqlite3_free(err_msg);
+        return -1;
+    }
+
+    sql = "CREATE INDEX IF NOT EXISTS idx_album_name ON album(name);";
+    if (sqlite3_exec(db, sql, 0, 0, &err_msg) != SQLITE_OK) {
+        fprintf(stderr, "[SQLite ERROR] Failed to create index 'idx_album_name': %s\n", err_msg);
         sqlite3_free(err_msg);
         return -1;
     }
